@@ -10,12 +10,14 @@ from fastapi.middleware.cors import CORSMiddleware
 
 # Import API routers
 from backend.src.api import sessions, books, search, explanations, summaries, learning_tools
+from backend.src.config import settings
 
 # Create the main FastAPI application
 app = FastAPI(
     title="AI-Enhanced Interactive Book Agent",
     description="An AI-powered reading companion with progress tracking, search, explanations, and learning tools",
-    version="0.1.0"
+    version="0.1.0",
+    # Add additional metadata from settings if needed
 )
 
 # Add CORS middleware to allow frontend communication

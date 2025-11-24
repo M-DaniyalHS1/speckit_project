@@ -13,9 +13,9 @@
 - [ ] T005 [P] Initialize git repository with proper initial commit
 
 ### Environment and Dependencies
-- [ ] T006 Configure environment variables for database, AI API keys, and other services
-- [ ] T007 Set up Docker configuration for local development
-- [ ] T008 Configure testing framework with pytest and coverage tools
+- [X] T006 Configure environment variables for database, AI API keys, and other services
+- [X] T007 Set up Docker configuration for local development
+- [X] T008 Configure testing framework with pytest and coverage tools
 
 ## Phase 2: Foundational Components
 
