@@ -36,7 +36,7 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-dev = "src.main:main"
+dev = "run_dev:main"
 test = "pytest"
 test-cov = "pytest --cov=backend.src --cov-report=html --cov-report=term"
 

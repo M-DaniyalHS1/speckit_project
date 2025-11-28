@@ -10,7 +10,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 # Import API routers
 from backend.src.api import sessions, books, search, explanations, summaries, learning_tools
+from backend.src.auth.auth_handler import router as auth_router
 from backend.src.config import settings
+from backend.src.middleware.auth import AuthMiddleware
 
 # Create the main FastAPI application
 app = FastAPI(
@@ -29,7 +31,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Add authentication middleware
+app.add_middleware(AuthMiddleware)
+
 # Include API routers
+app.include_router(auth_router, prefix="/api/v1", tags=["authentication"])
 app.include_router(sessions.router, prefix="/api/v1", tags=["sessions"])
 app.include_router(books.router, prefix="/api/v1", tags=["books"])
 app.include_router(search.router, prefix="/api/v1", tags=["search"])
