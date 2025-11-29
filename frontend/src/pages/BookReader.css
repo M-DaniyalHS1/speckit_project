@@ -1,0 +1,137 @@
+.book-reader-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Georgia', 'Times New Roman', serif;
+  line-height: 1.6;
+  color: #333;
+}
+
+.book-header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.book-header h1 {
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+.book-header h2 {
+  color: #7f8c8d;
+  font-size: 1.2em;
+  font-weight: normal;
+}
+
+.reading-interface {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 30px;
+}
+
+.progress-panel {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  height: fit-content;
+  position: sticky;
+  top: 20px;
+}
+
+.book-content {
+  background: #fdfdfd;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 30px;
+  min-height: 500px;
+}
+
+.chapter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.chapter-header h2 {
+  margin: 0;
+  color: #2c3e50;
+}
+
+.chapter-navigation {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.chapter-navigation button {
+  padding: 8px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.chapter-navigation button:hover {
+  background-color: #0056b3;
+}
+
+.chapter-navigation button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.chapter-navigation span {
+  min-width: 100px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.chapter-content {
+  font-size: 1.1em;
+  white-space: pre-line;
+}
+
+.loading, .error {
+  text-align: center;
+  padding: 40px;
+  font-size: 1.2em;
+}
+
+.error {
+  color: #dc3545;
+}
+
+/* Responsive design */
+@media (max-width: 992px) {
+  .reading-interface {
+    grid-template-columns: 1fr;
+  }
+  
+  .progress-panel {
+    position: static;
+  }
+}
+
+@media (max-width: 576px) {
+  .book-reader-container {
+    padding: 10px;
+  }
+  
+  .chapter-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
+  
+  .chapter-navigation {
+    width: 100%;
+    justify-content: center;
+  }
+}

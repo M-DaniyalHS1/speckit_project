@@ -1,0 +1,88 @@
+version: '3.8'
+
+services:
+  # Main application service for development
+  book-agent-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: book-agent-dev
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://book_agent_user:book_agent_pass@db:5432/book_agent_db
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - CHROMADB_PATH=/app/chroma_data
+      - ENVIRONMENT=development
+    volumes:
+      - .:/app  # Mount the entire project for live updates
+      - ./data:/app/data  # For book uploads
+      - ./chroma_data:/app/chroma_data  # For ChromaDB persistence
+    depends_on:
+      - db
+      - chroma
+    networks:
+      - book-agent-network
+    restart: unless-stopped
+
+  # PostgreSQL database
+  db:
+    image: postgres:15
+    container_name: book-agent-db
+    environment:
+      - POSTGRES_DB=book_agent_db
+      - POSTGRES_USER=book_agent_user
+      - POSTGRES_PASSWORD=book_agent_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - book_agent_postgres_data:/var/lib/postgresql/data
+    networks:
+      - book-agent-network
+    restart: unless-stopped
+
+  # ChromaDB for vector storage
+  chroma:
+    image: ghcr.io/chroma-core/chroma:latest
+    container_name: book-agent-chroma
+    environment:
+      - CHROMA_DB_IMPL=clickhouse
+      - CLICKHOUSE_HOST=clickhouse
+      - CLICKHOUSE_PORT=9000
+    ports:
+      - "8001:8000"
+    volumes:
+      - book_agent_chroma_data:/chroma/chroma
+    depends_on:
+      - clickhouse
+    networks:
+      - book-agent-network
+    restart: unless-stopped
+
+  # ClickHouse as the storage backend for ChromaDB
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: book-agent-clickhouse
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    ports:
+      - "8123:8123"   # HTTP
+      - "9000:9000"   # Native
+      - "9009:9009"   # TCP
+    volumes:
+      - book_agent_clickhouse_data:/var/lib/clickhouse
+    networks:
+      - book-agent-network
+    restart: unless-stopped
+
+networks:
+  book-agent-network:
+    driver: bridge
+
+volumes:
+  book_agent_postgres_data:
+  book_agent_chroma_data:
+  book_agent_clickhouse_data:

@@ -1,0 +1,397 @@
+openapi: 3.0.0
+info:
+  title: AI-Enhanced Interactive Book Agent API
+  description: API for the AI-powered book reading assistant
+  version: 1.0.0
+servers:
+  - url: https://api.book-agent.com/v1
+    description: Production server
+  - url: https://staging.book-agent.com/v1
+    description: Staging server
+
+paths:
+  /auth/register:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 8
+              required:
+                - email
+                - password
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_id:
+                    type: string
+                    format: uuid
+                  message:
+                    type: string
+        '400':
+          description: Invalid input
+        '409':
+          description: User already exists
+
+  /auth/login:
+    post:
+      summary: User login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+              required:
+                - email
+                - password
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  refresh_token:
+                    type: string
+                  user_id:
+                    type: string
+                    format: uuid
+        '401':
+          description: Invalid credentials
+
+  /books:
+    post:
+      summary: Upload a new book
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                title:
+                  type: string
+                author:
+                  type: string
+      responses:
+        '201':
+          description: Book uploaded and processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  book_id:
+                    type: string
+                    format: uuid
+                  title:
+                    type: string
+                  status:
+                    type: string
+                    enum: [processing, ready]
+        '400':
+          description: Invalid file format
+
+  /books/{book_id}:
+    get:
+      summary: Get book details
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: book_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Book details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '404':
+          description: Book not found
+
+  /books/{book_id}/search:
+    post:
+      summary: Search within a book
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: book_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: string
+                max_results:
+                  type: integer
+                  default: 5
+              required:
+                - query
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SearchResult'
+        '404':
+          description: Book not found
+
+  /books/{book_id}/explain:
+    post:
+      summary: Get explanation for book content
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: book_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content_ref:
+                  type: string
+                  description: Reference to content to explain (could be section, page, or text)
+                explanation_type:
+                  type: string
+                  enum: [simple, detailed, external_context]
+                  default: simple
+              required:
+                - content_ref
+      responses:
+        '200':
+          description: Explanation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Explanation'
+        '404':
+          description: Book or content not found
+
+  /books/{book_id}/summarize:
+    post:
+      summary: Summarize book content
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: book_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content_ref:
+                  type: string
+                  description: Reference to content to summarize (could be section, page, or text)
+                summary_type:
+                  type: string
+                  enum: [brief, detailed, key_points]
+                  default: brief
+              required:
+                - content_ref
+      responses:
+        '200':
+          description: Summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Summary'
+        '404':
+          description: Book or content not found
+
+  /sessions/current:
+    get:
+      summary: Get current reading session
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Current session details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadingSession'
+        '204':
+          description: No active session
+
+  /sessions/{session_id}:
+    get:
+      summary: Get specific session details
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Session details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadingSession'
+        '404':
+          description: Session not found
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Book:
+      type: object
+      properties:
+        book_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        author:
+          type: string
+        file_format:
+          type: string
+        upload_date:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [processing, ready, failed]
+
+    SearchResult:
+      type: object
+      properties:
+        content_id:
+          type: string
+          format: uuid
+        section_title:
+          type: string
+        content:
+          type: string
+        page_number:
+          type: integer
+        relevance_score:
+          type: number
+          format: float
+
+    Explanation:
+      type: object
+      properties:
+        explanation_id:
+          type: string
+          format: uuid
+        content:
+          type: string
+        confidence_score:
+          type: number
+          format: float
+        citations:
+          type: array
+          items:
+            type: object
+            properties:
+              content_id:
+                type: string
+                format: uuid
+              page:
+                type: integer
+              text:
+                type: string
+
+    Summary:
+      type: object
+      properties:
+        summary_id:
+          type: string
+          format: uuid
+        content:
+          type: string
+        summary_type:
+          type: string
+          enum: [brief, detailed, key_points]
+
+    ReadingSession:
+      type: object
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        book_id:
+          type: string
+          format: uuid
+        current_location:
+          type: string
+        start_time:
+          type: string
+          format: date-time
+        last_access:
+          type: string
+          format: date-time
+        is_active:
+          type: boolean
