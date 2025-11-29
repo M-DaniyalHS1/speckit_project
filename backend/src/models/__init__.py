@@ -7,6 +7,7 @@ from .query import Query as PydanticQuery
 from .explanation import Explanation as PydanticExplanation
 from .learning_material import LearningMaterial as PydanticLearningMaterial
 from .sqlalchemy_models import User as SQLAlchemyUser
+from .responses import ErrorResponse, ValidationErrorResponse, SuccessResponse, UnifiedErrorResponse
 
 __all__ = [
     "PydanticUser",
@@ -17,4 +18,8 @@ __all__ = [
     "PydanticExplanation",
     "PydanticLearningMaterial",
     "SQLAlchemyUser",
+    "ErrorResponse",
+    "ValidationErrorResponse",
+    "SuccessResponse",
+    "UnifiedErrorResponse"
 ]
